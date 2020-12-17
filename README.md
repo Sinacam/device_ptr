@@ -18,3 +18,6 @@ device_ptr    d3{(U*)get(d1)};  // with CTAD
 
 ## Installation
 Just `#include"device_ptr.h"`, requires C++14. Forward compatible up to C++20.
+
+## Remarks
+Despite its triviality, member functions messes with the inliner and will potentially pessimize the resulting code.
