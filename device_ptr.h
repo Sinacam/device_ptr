@@ -23,13 +23,19 @@ with CTAD
 #ifndef __host__
 #define __host__
 #define UNDEF_HOST
-#warning "Compiling device_ptr.h without nvcc"
 #endif
 
 #ifndef __device__
 #define __device__
 #define UNDEF_DEVICE
-#warning "Compiling device_ptr.h without nvcc"
+#endif
+
+#if defined(UNDEF_HOST) || defined(UNDEF_DEVICE)
+namespace detail
+{
+    [[maybe_unused]] struct [[deprecated("Compiling device_ptr.h without nvcc")]] {
+    } warning;
+}
 #endif
 
 namespace detail
