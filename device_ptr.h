@@ -34,6 +34,11 @@ Reinterpreting device_ptr<T> as device_ptr<U> is impossible, it has to round-tri
 namespace detail
 {
     using sfinae = int;
+#if __cplusplus >= 201703L
+    using iterator_category = std::contiguous_iterator_tag;
+#else
+    using iterator_category = std::random_access_iterator_tag;
+#endif
 }
 
 template<typename T, typename = detail::sfinae>
@@ -42,7 +47,7 @@ class device_ptr
     template<typename, typename>
     friend class device_ptr;
 public:
-    using iterator_category = std::contiguous_iterator_tag;
+    using iterator_category = detail::iterator_category;
     using iterator_concept = iterator_category;
     using value_type = T;
     using reference = T&;
@@ -56,14 +61,14 @@ public:
     __host__ __device__
     explicit device_ptr(T* ptr) : ptr{ptr} {}
 
-    template<typename U = detail::sfinae, std::enable_if_t<std::is_const_v<T>, U> = 0>
+    template<typename U = detail::sfinae, std::enable_if_t<std::is_const<T>::value, U> = 0>
     __host__ __device__
     device_ptr(device_ptr<std::remove_const_t<T>> dp) : ptr{dp.ptr} {}
 
-    template<typename Void, std::enable_if_t<std::is_void_v<Void>, int> = 0>
+    template<typename Void, std::enable_if_t<std::is_void<Void>::value, int> = 0>
     __host__ __device__
     explicit device_ptr(device_ptr<Void> dp) : ptr{dp.ptr} {}
-    template<typename Void, std::enable_if_t<std::is_void_v<Void>, int> = 0>
+    template<typename Void, std::enable_if_t<std::is_void<Void>::value, int> = 0>
     __host__ __device__
     explicit device_ptr(device_ptr<const Void> dp) : ptr{dp.ptr} {}
 
@@ -170,13 +175,13 @@ public:
         return x.ptr >= y.ptr;
     }
 
-    template<typename Void, std::enable_if_t<std::is_void_v<Void>, int> = 0>
+    template<typename Void, std::enable_if_t<std::is_void<Void>::value, int> = 0>
     __host__ __device__
     operator device_ptr<Void>() const
     {
         return device_ptr<Void>{ptr};
     }
-    template<typename Integral, std::enable_if_t<std::is_integral_v<Integral>, int> = 0>
+    template<typename Integral, std::enable_if_t<std::is_integral<Integral>::value, int> = 0>
     __host__ __device__
     explicit operator Integral() const
     {
@@ -220,7 +225,7 @@ private:
 };
 
 template<typename Void>
-class device_ptr<Void, std::enable_if_t<std::is_void_v<std::remove_cv_t<Void>>, detail::sfinae>>
+class device_ptr<Void, std::enable_if_t<std::is_void<std::remove_cv_t<Void>>::value, detail::sfinae>>
 {
     template<typename, typename>
     friend class device_ptr;
@@ -264,7 +269,7 @@ public:
         return x.ptr >= y.ptr;
     }
 
-    template<typename Integral, std::enable_if_t<std::is_integral_v<Integral>, int> = 0>
+    template<typename Integral, std::enable_if_t<std::is_integral<Integral>::value, int> = 0>
     __host__ __device__
     explicit operator Integral() const
     {
