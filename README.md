@@ -14,3 +14,6 @@ device_ptr<T> d1 = // ...
 device_ptr<U> d2{(U*)get(d1)};
 device_ptr    d3{(U*)get(d1)};  // with CTAD
  ```
+
+## Installation
+Just `#include"device_ptr.h"`, requires C++14. Forward compatible up to C++20.
