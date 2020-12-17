@@ -6,6 +6,7 @@ Given that `T*` is an object pointer, `device_ptr<T>` is identical to a `T*` exc
 3. Casting to `T*` and `void*` is required to be explicit.
 4. Casting to `bool` is required to be explicit.
 5. Can't be initialized with `NULL` (use `nullptr` instead).
+
 There is also a free function `get` to fetch `T*`.
 
 Reinterpreting `device_ptr<T>` as `device_ptr<U>` is impossible, it has to round-trip through actual pointers
