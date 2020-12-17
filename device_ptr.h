@@ -23,11 +23,13 @@ with CTAD
 #ifndef __host__
 #define __host__
 #define UNDEF_HOST
+#warning "Compiling device_ptr.h without nvcc"
 #endif
 
 #ifndef __device__
 #define __device__
 #define UNDEF_DEVICE
+#warning "Compiling device_ptr.h without nvcc"
 #endif
 
 namespace detail
@@ -38,6 +40,15 @@ namespace detail
 #else
     using iterator_category = std::random_access_iterator_tag;
 #endif
+
+    template<typename T, typename...>
+    struct dependent
+    {
+        using type = T;
+    };
+    template<typename T, typename... Us>
+    using dependent_t = typename dependent<T, Us...>::type;
+
 } // namespace detail
 
 template <typename T, typename = detail::sfinae>
@@ -59,7 +70,7 @@ class device_ptr
     __host__ __device__ explicit device_ptr(T* ptr) : ptr{ptr} {}
 
     template <typename U = detail::sfinae, std::enable_if_t<std::is_const<T>::value, U> = 0>
-    __host__ __device__ device_ptr(device_ptr<std::remove_const_t<T>> dp) : ptr{dp.ptr}
+    __host__ __device__ device_ptr(device_ptr<std::remove_const_t<detail::dependent_t<T, U>>> dp) : ptr{dp.ptr}
     {
     }
 
